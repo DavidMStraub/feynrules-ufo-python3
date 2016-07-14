@@ -45,7 +45,7 @@ CollectByTag[expi_] := Block[{
    Return[tempexpi];
 
 ];
-   
+
 
 
 CollectCouplingsByTag[CouplingObject[name_, coupl_]] := Block[{
@@ -61,7 +61,7 @@ CollectCouplingsByTag[CouplingObject[name_, coupl_]] := Block[{
     UVCoupl = Cases[coupli, {PYR2UVTag["UV"], _}][[1,2]];
 
     Return[{CouplingObject[name, LOCoupl], R2CouplingObject[name, R2Coupl], UVCouplingObject[name, UVCoupl]}];
-]; 
+];
 
 
 CollectCouplingsByTag[list_List] := CollectCouplingsByTag /@ list;
@@ -82,13 +82,13 @@ CleanZeroPYVertices[{parti_List, rest__}] := Block[{
       ];
 ];
 
-    
 
 
-CleanZeroPYIndividualVertices[{verts__, last_}] := Block[{ 
+
+CleanZeroPYIndividualVertices[{verts__, last_}] := Block[{
     cc = DeleteCases[last, 0]
     },
-    
+
     If[cc === {},
        Return[0],
        Return[{verts, cc}]
@@ -102,13 +102,13 @@ BuildPYR2UVVertices[vertexlist_List, couplings_List, tag_:"1"] := Block[{
      },
 
     (* First we read out the couplings *)
-    (* If the tag is "R2", we need the second line of the coupling matrix 
+    (* If the tag is "R2", we need the second line of the coupling matrix
        If the tag is "UV", the 3rd, if "1" the first *)
     coupls = Which[tag === "1",  couplings[[1]],
                    tag === "R2", couplings[[2]],
                    tag === "UV", couplings[[3]]
                   ];
- 
+
     (* Take those that are zero *)
     zerocouplrules = Cases[coupls, _[_,0]];
     coupls = Complement[coupls, zerocouplrules];
@@ -120,9 +120,9 @@ BuildPYR2UVVertices[vertexlist_List, couplings_List, tag_:"1"] := Block[{
     Return[{cleanvertices, coupls}];
 ];
 
-    
-             
-     
+
+
+
 
 
 (* ::Section:: *)
@@ -146,8 +146,8 @@ CreatePYLoopParticles[loopparts_List, repllist_:FeynArtsToFeynRulesParticles] :=
 
    loopy = loopy //. repllist;
 
-   (* We do not need antiparticle distinctions. 
-      Indeed, if a certain particle can not appear in a loop, 
+   (* We do not need antiparticle distinctions.
+      Indeed, if a certain particle can not appear in a loop,
       its antiparticle cannot either
     *)
    loopy = If[AntiFieldQ[#] === True, anti[#], #]& /@ loopy;
@@ -158,7 +158,7 @@ CreatePYLoopParticles[loopparts_List, repllist_:FeynArtsToFeynRulesParticles] :=
 
    Return[loopy];
 ];
-   
+
 
 
 (* ::Subsection:: *)
@@ -169,7 +169,7 @@ SumByLoopParticles[ListOfCoupls_List] := Block[{
    first = ListOfCoupls[[1,1]],
    summands = ListOfCoupls[[All,2]]
    },
- 
+
    summands = Plus @@ summands;
    Return[{first, summands}];
 ];
@@ -191,7 +191,7 @@ InventNewNameForR2UVCouplingObject[listi_List, r2uvtag_String, counter_Integer] 
     Return[fulllist];
 ];
 
-    
+
 
 
 CreateNewNamesForR2UVCouplingObject[listcoupl_List, r2uvtag_String] := Block[{
@@ -201,15 +201,15 @@ CreateNewNamesForR2UVCouplingObject[listcoupl_List, r2uvtag_String] := Block[{
    allobjs = GatherByFirstElement[allobjs];
 
 
-  
+
    allobjs = Flatten[Table[InventNewNameForR2UVCouplingObject[allobjs[[iii]], r2uvtag, iii], {iii, Length[allobjs]}]];
 
    Return[allobjs];
 ];
-   
-   
 
-    
+
+
+
 
 
 GatherByLoopParticles[couplingobject_] := Block[{
@@ -230,12 +230,12 @@ GatherByLoopParticles[couplingobject_] := Block[{
    couplingconst = GatherByFirstElement[couplingconst];
    couplingconst = SumByLoopParticles /@ couplingconst;
 
-   couplingconst = head[name, ##]& @@@ couplingconst;   
+   couplingconst = head[name, ##]& @@@ couplingconst;
 
    Return[couplingconst];
 ];
 
-   
+
 
 
 RenameNLOCoupling[elem_, repl_] := Block[{
@@ -247,7 +247,7 @@ RenameNLOCoupling[elem_, repl_] := Block[{
    },
 
    newname = Cases[MyRule @@@ repl, MyRule[{oldname, lops},_]][[1,2]];
-  
+
    Return[head[oldname, lops, newname, analytic]];
 
 ];
@@ -263,7 +263,7 @@ AddLoopParticlesToVertex[{particles_List, rest__}, coupllist_List, tag_String] :
 
     restlist = Flatten[AddLoopParticlesToVertexTerm[#, coupllist]& /@ restlist] /. dumbo -> List;
     restlist= Join @@ restlist;
-  
+
     (* We need to collect couplings for which color, Lorentz and loop particles are identical,
        because they only differ by an interaction order *)
     restlist = GatherByFirstElement[{#[[1;;3]], #[[4]]}& /@ restlist];
@@ -279,8 +279,8 @@ AddLoopParticlesToVertexTerm[{colorstruc_, lorentzstruc_, couplingstruclist_List
    },
    allcoups = Reverse[Most[Rest[#]]]& /@ Flatten[Table[Select[coupllist, Not[FreeQ[#, elem]]&], {elem, couplingstruclist}]];
    allcoups = dumbo[colorstruc, lorentzstruc, Sort[Last /@ #], #[[1,1]]]& /@ GatherByFirstElement[allcoups];
-   allcoups = dumbo @@ allcoups; 
-   
+   allcoups = dumbo @@ allcoups;
+
 
    Return[allcoups];
 
@@ -293,7 +293,7 @@ AddLoopParticlesToVertexTerm[{colorstruc_, lorentzstruc_, couplingstruclist_List
 
 ProcessNLOVertices[R2verts_List, R2coupls_List, UVverts_List, UVcoupls_List] := Block[{
    R2V = R2verts,
-   R2C = R2coupls, 
+   R2C = R2coupls,
    UVV = UVverts,
    UVC = UVcoupls,
    optimizedrenamingrulesR2, optimizedrenamingrulesUV
@@ -313,10 +313,10 @@ ProcessNLOVertices[R2verts_List, R2coupls_List, UVverts_List, UVcoupls_List] := 
 
    (* Build the replacement list *)
    PYNLO$R2CouplingRename = CreateNewNamesForR2UVCouplingObject[R2C, "R2"];
-   PYNLO$UVCouplingRename = CreateNewNamesForR2UVCouplingObject[UVC, "UV"]; 
+   PYNLO$UVCouplingRename = CreateNewNamesForR2UVCouplingObject[UVC, "UV"];
 
    (* Optimize renaming *)
-   
+
 
    (* Rename *)
    R2C = RenameNLOCoupling[#, PYNLO$R2CouplingRename]& /@ R2C;
@@ -337,12 +337,12 @@ ProcessNLOVertices[R2verts_List, R2coupls_List, UVverts_List, UVcoupls_List] := 
    UVC = Drop[#, 2]& /@ UVC;
    R2C = KillDoubles[Join[R2C, UVC]];
 
-   
+
 
    Return[{R2V, R2C}];
 ];
-   
-   
+
+
 
 
 (* ::Section:: *)
@@ -366,22 +366,23 @@ WritePYCTParamters[list_] := Block[{outfile},
    outfile = OpenWrite["CT_parameters.py"];
 
    WritePYFRHeader[outfile];
-   WriteString[outfile, "from object_library import all_CTparameters, CTParameter\n"];
-   WriteString[outfile, "\nfrom function_library import ", Sequence @@ Riffle[PY$NewCMathFunctions, ", "], "\n\n"];
+   WriteString[outfile, "from __future__ import absolute_import\n"];
+   WriteString[outfile, "from .object_library import all_CTparameters, CTParameter\n"];
+   WriteString[outfile, "\nfrom .function_library import ", Sequence @@ Riffle[PY$NewCMathFunctions, ", "], "\n\n"];
    WriteString[outfile, "\n\n"];
 
 
    WriteParameterObject[outfile, #]& /@ (CreateCTParamterObjectEntry /@ list);
-   
+
    Close[outfile];
-  
+
    AppendTo[GenInt$LogFile, "   * " <> If[Length[list] == 1, "1 CTparameter", ToString[Length[list]] <> " CTparameters"] <> " written."];
    TestQ[FileExistsQ, "CT_parameters.py", "   * CT_parameters.py written.", "   * CT_parameters.py not written"];
 
    (* Write the log file *)
    WriteToLogFile[GenInt$LogFileName];
 
-]; 
+];
 
 
 (* ::Section:: *)
@@ -405,24 +406,25 @@ WritePYCTCouplings[list_] := Block[{outfile},
    outfile = OpenWrite["CT_couplings.py"];
 
    WritePYFRHeader[outfile];
-   WriteString[outfile, "from object_library import all_couplings, Coupling\n"];
-   WriteString[outfile, "\nfrom function_library import ", Sequence @@ Riffle[PY$NewCMathFunctions, ", "], "\n\n"];
+   WriteString[outfile, "from __future__ import absolute_import\n"];
+   WriteString[outfile, "from .object_library import all_couplings, Coupling\n"];
+   WriteString[outfile, "\nfrom .function_library import ", Sequence @@ Riffle[PY$NewCMathFunctions, ", "], "\n\n"];
    WriteString[outfile, "\n\n"];
 
 (*Print["In WPYCTCoupl"];
   Print[InputForm[list]];Print[InputForm[CreateCouplingObjectEntry /@ list]];*)
 
    WriteCouplingObject[outfile, #]& /@ (CreateCouplingObjectEntry /@ list);
-   
+
    Close[outfile];
-  
+
    AppendTo[GenInt$LogFile, "   * " <> If[Length[list] == 1, "1 CTcoupling", ToString[Length[list]] <> " CTcouplings"] <> " written."];
    TestQ[FileExistsQ, "CT_couplings.py", "   * CT_couplings.py written.", "   * CT_couplings.py not written"];
 
    (* Write the log file *)
    WriteToLogFile[GenInt$LogFileName];
 
-]; 
+];
 
 
 (* ::Section:: *)
@@ -459,8 +461,8 @@ CreateCTVertexObjectEntry[list_, {counter_Integer}] := Block[{
      pyvertex
     },
 
-   (* Remove the CC statements, and the bar for Majoranas, 
-      then introduce the particle names, and finally 
+   (* Remove the CC statements, and the bar for Majoranas,
+      then introduce the particle names, and finally
       check if we need new Particle object names.
     *)
 
@@ -472,7 +474,7 @@ CreateCTVertexObjectEntry[list_, {counter_Integer}] := Block[{
     coupl = {PythonForm[#1], #2, PYFormLoopParticles[#3], #4}& @@@ coupl;
     colors = Union[First /@ coupl];
     loops = Union[#[[3]]& /@ coupl];
-    
+
     (* We now build replacement rules to identify back the Lorentz and color structures,
        and how they are convolved.
      *)
@@ -483,8 +485,8 @@ CreateCTVertexObjectEntry[list_, {counter_Integer}] := Block[{
     (* And we then apply these reverse replacements to coupl *)
     coupl = coupl /. colorreverse /. lorentzreverse /. loopsreverse;
 
-    (* Finally, since a list in Python starts with 0, and not one, we 
-       have to rescale everything by one unit 
+    (* Finally, since a list in Python starts with 0, and not one, we
+       have to rescale everything by one unit
      *)
      coupl = {#1-1, #2-1, #3-1, #4}& @@@ coupl;
 
@@ -506,10 +508,10 @@ CreateCTVertexObjectEntry[list_, {counter_Integer}] := Block[{
 
      (* Return and exit *)
      Return[pyvertex];
-                 
+
 ];
 
-    
+
 
 
 (* ::Section:: *)
@@ -529,7 +531,7 @@ WriteCTVertexObject[file_, vertex_List] := Block[{
      WriteString[file, "\n"];
 
 ];
-   
+
 
 
 (* ::Section:: *)
@@ -553,23 +555,24 @@ WritePYCTVertices[vertlist_] := Block[{outfile},
    outfile = OpenWrite["CT_vertices.py"];
 
    WritePYFRHeader[outfile];
-   WriteString[outfile, "from object_library import all_vertices, all_CTvertices, Vertex, CTVertex\n"];
-   WriteString[outfile, "import particles as P\n"];
-   WriteString[outfile, "import CT_couplings as C\n"];
-   WriteString[outfile, "import lorentz as L\n"];
+   WriteString[outfile, "from __future__ import absolute_import\n"];
+   WriteString[outfile, "from .object_library import all_vertices, all_CTvertices, Vertex, CTVertex\n"];
+   WriteString[outfile, "from . import particles as P\n"];
+   WriteString[outfile, "from . import CT_couplings as C\n"];
+   WriteString[outfile, "from . import lorentz as L\n"];
    WriteString[outfile, "\n\n"];
 
    WriteCTVertexObject[outfile, #1]& /@ MapIndexed[CreateCTVertexObjectEntry, vertlist];
-   
+
    Close[outfile];
-  
+
    AppendTo[GenInt$LogFile, "   * " <> If[Length[vertlist] == 1, "1 CTvertex", ToString[Length[vertlist]] <> " CTvertices"] <> " written."];
    TestQ[FileExistsQ, "CT_vertices.py", "   * CT_vertices.py written.", "   * CT_vertices.py not written"];
 
    (* Write the log file *)
    WriteToLogFile[GenInt$LogFileName];
 
-]; 
+];
 
 
 (* ::Section:: *)
@@ -609,12 +612,12 @@ ProjectMasslessCountertermOntoMSBar[uvcounterterm_] := Block[{
    rest = Expand[counterterm - uvterm];
    uvterm = Expand[Coefficient[uvterm, FR$Eps, -1]/FR$Eps];
    counterterm = uvterm+rest;
-   
+
    Return[{particles, counterterm}];
 
 ];
 
-   
+
 
 
 (* ::Section:: *)
@@ -627,7 +630,7 @@ CreateAssumptionObject[string_String, {i_}]:= AssumptionObject["Assumption"<>ToS
       {"validity", "'nlo'"}}
      ];
 
-   
+
 
 
 WriteOutAssumptionObject[name_String,ass_] := Block[{
@@ -644,17 +647,13 @@ WritePYAssumptions[list_List] := Block[{asslist = ToString /@ list,
     file},
 
     asslist = MapIndexed[CreateAssumptionObject, asslist];
-    
+
     DeleteFileIfExists["assumptions.py"];
     file = OpenWrite["assumptions.py"];
     WritePYFRHeader["assumptions.py"];
-    WriteString[file, "from object_library import all_assumptions, Assumption\n\n\n"];
+    WriteString[outfile, "from __future__ import absolute_import\n"];
+    WriteString[file, "from .object_library import all_assumptions, Assumption\n\n\n"];
     Close[file];
 
     WriteOutAssumptionObject["assumptions.py", #]& /@ asslist;
 ];
-  
-    
-
-
-   

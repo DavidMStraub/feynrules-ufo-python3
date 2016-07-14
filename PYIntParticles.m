@@ -100,11 +100,11 @@ GenIntChangeParticleConventions[partlistentry_] := Join[partlistentry[[1;;2]], {
 
 
 GenIntRemoveParticles[partlist_] := Block[{temppartlist = partlist, removed, newpartlist},
-   
+
    (* Remove particles that are not in GenInt$Classes nor GenInt$Spins*)
 
    newpartlist = Select[temppartlist, MemberQ[Join[GenInt$Classes, GenInt$Spins], #[[3]]]&];
-   
+
    removed = Complement[temppartlist, newpartlist];
    If[Length[removed] =!= 0,
       AppendTo[GenInt$LogFile, "   * Particle " <> #1 <> " removed. Not in GenInt$Classes."]& @@@ removed
@@ -115,7 +115,7 @@ GenIntRemoveParticles[partlist_] := Block[{temppartlist = partlist, removed, new
 
    (* Remove particles that are not in GenInt$Colors *)
    newpartlist = Select[temppartlist, MemberQ[GenInt$Colors, #[[7]]]&];
-   
+
    removed = Complement[temppartlist, newpartlist];
    If[Length[removed] =!= 0,
       AppendTo[GenInt$LogFile, "   * Particle " <> #1 <> " removed. Not in GenInt$Colors."]& @@@ removed
@@ -127,7 +127,7 @@ GenIntRemoveParticles[partlist_] := Block[{temppartlist = partlist, removed, new
 (*   (* Remove GoldStones (if relevant) *)
    If[Not[GenInt$Goldstones],
       newpartlist = Cases[temppartlist, {___, NoGS}];
-   
+
       removed = Complement[temppartlist, newpartlist];
       If[Length[removed] =!= 0,
          AppendTo[GenInt$LogFile, "   * Particle " <> #1 <> " removed. Goldstone boson."]& @@@ removed
@@ -195,18 +195,18 @@ GenIntGlobalParticleTests[partlist_] := Block[{temp},
 
 
 GenIntIndividualParticleTests[partlist_]:= Block[{},
-   
+
    (* Test ParticleName *)
    TestQ[IsGenIntParticleName, #, "   >>> Some particle names are not strings!"]& /@ partlist[[All, 1]];
 
    (* Test AntiParticleName *)
    TestQ[IsGenIntParticleName, #, "   >>> Some antiparticle names are not strings!"]& /@ partlist[[All, 2]];
 
-   (* Test PDG *)    
+   (* Test PDG *)
    TestQ[IsGenIntPDG, #, "   >>> Some antiparticle names are not strings!"]& /@ partlist[[All, 9]];
 
 ];
-   
+
 
 
 (* ::Subsection:: *)
@@ -279,7 +279,7 @@ CheckPythonParticles[partlist_] := Block[{plist = partlist},
    plist = AssignPDGCodes[plist];
 
    (* Write results to the LogFile *)
-   If[Length[GenInt$LogFile] == 0, 
+   If[Length[GenInt$LogFile] == 0,
       AppendTo[GenInt$LogFile, "   * All particles are ok."]
       ];
    AppendTo[GenInt$LogFile, ""];
@@ -292,7 +292,7 @@ CheckPythonParticles[partlist_] := Block[{plist = partlist},
 
    (* Write to Logfile *)
    WriteToLogFile[GenInt$LogFileName];
-   
+
 
    (* Return  and exit *)
    Return[plist];
@@ -324,14 +324,14 @@ PutUndefinedMassesToZERO[particles_] := Block[{MyAspergeMasses={},
 
    (* Read out the mass and width symbols which have a NoValue[1] *)
    zeromasses = #[[2]]& /@ Cases[zeromasses, {a1_,a2_?(Not[MemberQ[MyAspergeMasses,#]]&),NoValue[1]}];
- 
+
    (* Make a replacement list out of it *)
    zeromasses = Rule[#,ZERO]& /@ zeromasses;
 
    (* and apply it to the particle list *)
    Return[particles /. zeromasses];
 
-];  
+];
 
 
 (* ::Section:: *)
@@ -348,13 +348,13 @@ PutUndefinedMassesToZERO[particles_] := Block[{MyAspergeMasses={},
 
 
 AssignPDGCodes[partlist_] := Block[{nopdgs},
-    
+
    (* Select particles without pdg code *)
    nopdgs = Cases[partlist, {___, NoPDG[_], ___}];
-   
+
    (* If there are particles without pdg code, then add a sentence to the GenInt Dialog and to the logfile *)
    AppendTo[GenInt$LogFile, ""];
-   If[nopdgs =!= {}, 
+   If[nopdgs =!= {},
       AppendTo[GenInt$DialogString, "- Some particles do not have assigned a PDG. Assigning automatic PDG codes.\n"];
       AppendTo[GenInt$LogFile, "# Automatically assigned PDG numbers"];
       AppendTo[GenInt$LogFile, "   * Assigned PDG number " <> ToString[#[[9, 1]]] <> " to particle " <> ToString[#[[1]]]]& /@ nopdgs
@@ -380,12 +380,12 @@ AssignPDGCodes[partlist_] := Block[{nopdgs},
 
 
 CheckPDGCodes[partlist_] := Block[{pdgs = partlist[[All, 9]], miss},
-    
+
    AppendTo[GenInt$LogFile, ""];
    AppendTo[GenInt$LogFile, "# Compulsory PDG codes:"];
 
    Do[miss = Complement[Rest[GenInt$CompulsoryPDG[[kk]]], pdgs];
-      If[Length[miss] == 0, 
+      If[Length[miss] == 0,
          AppendTo[GenInt$LogFile, "   * Class " <> ToString[GenInt$CompulsoryPDG[[kk,1]]] <> " complete."],
          (*else*)
          AppendTo[GenInt$LogFile, "   * Class " <> ToString[GenInt$CompulsoryPDG[[kk,1]]] <> " incomplete. " <> PYListString[miss] <> " missing."]
@@ -416,17 +416,17 @@ CreateQNumberEntry[partdef_] := Block[{Qnums,
 
     (* Create the list, and rename "Q" to "charge" *)
     Qnums = (({ToString[#], ToString[#[PartSymbol[partdef]], InputForm]}&) /@ mr$QNums)/. "Q"->"charge";
-    (* Put "charge" in first place *) 
+    (* Put "charge" in first place *)
     Qnums = Prepend[DeleteCases[Qnums, {"charge", _}], Cases[Qnums, {"charge", _}][[1]]];
-    
+
     (* Return and exit *)
     Return[Qnums];
 
 ];
 
-    
-   
-   
+
+
+
 
 
 (* ::Subsection:: *)
@@ -441,7 +441,7 @@ CreateQNumberEntry[partdef_] := Block[{Qnums,
 
 
 CreateParticleObjectEntry[partdef_] := Block[{dicout},
-   
+
    dicout = {{"pdg_code",     ToString[partdef[[9]]]},
              {"name",         PYString[partdef[[1]]]},
              {"antiname",     PYString[partdef[[2]]]},
@@ -466,7 +466,7 @@ CreateParticleObjectEntry[partdef_] := Block[{dicout},
     Return[dicout]
 
 ];
-             
+
 
 
 (* ::Section:: *)
@@ -502,7 +502,7 @@ WriteParticleObject[file_, list_List] := Block[{
 
      WritePYObject[file, classname, "Particle", list];
      WriteString[file, "\n"];
-     
+
      (* If we have an antiparticle, than we also need to declare the antiparticle *)
      If[classname =!= anticlassname,
         WriteString[file, anticlassname, " = ", classname, ".anti()\n"];
@@ -510,7 +510,7 @@ WriteParticleObject[file_, list_List] := Block[{
        ];
 ];
 
-      
+
 
 
 (* ::Subsection:: *)
@@ -532,20 +532,17 @@ WritePYParticles[partlist_] := Block[{partfile, plist = partlist, outfile},
 
    WritePYFRHeader[outfile];
    WriteString[outfile, "from __future__ import division\n"];
-   WriteString[outfile, "from object_library import all_particles, Particle\n"];
-   WriteString[outfile, "import parameters as Param\n\n"];
-   WriteString[outfile, "import propagators as Prop\n\n"];
+   WriteString[outfile, "from __future__ import absolute_import\n"];
+   WriteString[outfile, "from .object_library import all_particles, Particle\n"];
+   WriteString[outfile, "from . import parameters as Param\n\n"];
+   WriteString[outfile, "from . import propagators as Prop\n\n"];
 
    WriteParticleObject[outfile, #]& /@ plist;
 
    Close[outfile];
    TestQ[FileExistsQ, "particles.py", "   * particles.py written.", "   * particles.py not written"];
-   
+
    (* Write the Log file *)
    WriteToLogFile[GenInt$LogFileName];
 
 ];
-
-   
-
-   

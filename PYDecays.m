@@ -51,9 +51,9 @@ GetUFODecays[vertices_List, OptionsPattern[]] := Block[{
     simplify = OptionValue[SimplifyDecays]
     },
 
-    decays = Timing[CalculateM2Decays[verts]]; 
+    decays = Timing[CalculateM2Decays[verts]];
     Print["Squared matrix elent compute in ", decays[[1]], " seconds."]; decays=decays[[2]];
-   
+
     decays = Timing[ComputeDecays[decays, Simplify -> simplify, ProgressIndicator -> False]];
     Print["Decay widths computed in ", decays[[1]], " seconds."]; decays=decays[[2]];
 
@@ -63,8 +63,8 @@ GetUFODecays[vertices_List, OptionsPattern[]] := Block[{
 
     Return[decays];
 ];
-    
-    
+
+
 
 
 (* ::Section:: *)
@@ -87,7 +87,7 @@ CreatePYDecayChannel[finalstate_List, m2_] := Block[{
 
     Return[PYDicEntry[final, PYString[matrixelement]]]
 ];
-     
+
 
 
 (* ::Section:: *)
@@ -97,9 +97,9 @@ CreatePYDecayChannel[finalstate_List, m2_] := Block[{
 CreateDecayObjectEntry[incoming_, channels__] := Block[{
    inpart = CreateObjectParticleName[PartNameMG[incoming]],
    chans = CreatePYDecayChannel @@@ {channels},
-   attributes, 
+   attributes,
    first, last, bulk, allchannels,
-   object 
+   object
    },
 
    object = "Decay_" <> CreateObjectParticleName[PartNameMG[incoming]];
@@ -122,9 +122,9 @@ CreateDecayObjectEntry[incoming_, channels__] := Block[{
 
 ];
 
-   
 
-   
+
+
 
 
 (* ::Section:: *)
@@ -138,7 +138,7 @@ WriteDecayObject[file_, {object_, atts_List}] := Block[{
      WriteString[file, "\n"];
 
 ];
-   
+
 
 
 (* ::Section:: *)
@@ -158,19 +158,20 @@ WriteUFODecays[vertlist_] := Block[{outfile, verts},
    outfile = OpenWrite["decays.py"];
 
    WritePYFRHeader[outfile];
-   WriteString[outfile, "from object_library import all_decays, Decay\n"];
-   WriteString[outfile, "import particles as P\n"];
+   WriteString[outfile, "from __future__ import absolute_import\n"];
+   WriteString[outfile, "from .object_library import all_decays, Decay\n"];
+   WriteString[outfile, "from . import particles as P\n"];
    WriteString[outfile, "\n\n"];
 
    verts = CreateDecayObjectEntry @@@ vertlist;
    WriteDecayObject[outfile, #]& /@ verts;
-   
+
    Close[outfile];
-  
+
    AppendTo[GenInt$LogFile, "   * " <> If[Length[vertlist] == 1, "1 decay", ToString[Length[vertlist]] <> " decays"] <> " written."];
    TestQ[FileExistsQ, "decay.py", "   * decay.py written.", "   * decay.py not written"];
 
    (* Write the log file *)
    WriteToLogFile[GenInt$LogFileName];
 
-]; 
+];

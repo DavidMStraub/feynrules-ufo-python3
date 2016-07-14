@@ -48,15 +48,15 @@ PYSplitVertices[vertices_] := Block[{
     colorstruc, lorentzstruc, couplstruc,
     lorobjrules,couplobjrules, numberrpls, reversenumberrpls,
     PYSVPower, PYSVPi, PYSVE, PYSVSqrt, PYSVLog,
-    PYSVSin, PYSVCos, PYSVTan, PYSVCot, PYSVCsc, PYSVSec, 
+    PYSVSin, PYSVCos, PYSVTan, PYSVCot, PYSVCsc, PYSVSec,
     PYSVArcSin, PYSVArcCos, PYSVArcTan, PYSVArcCot, PYSVArcSec, PYSVArcCsc,
-    PYSVSinh, PYSVCosh, PYSVTanh, PYSVCoth, PYSVCsch, PYSVSech, 
+    PYSVSinh, PYSVCosh, PYSVTanh, PYSVCoth, PYSVCsch, PYSVSech,
     PYSVArcSinh, PYSVArcCosh, PYSVArcTanh, PYSVArcCoth, PYSVArcSech, PYSVArcCsch},
 
     (* We have to rename certain numbers, which should not be trated like numbers *)
     numberrpls = {Power[x_, r_Rational] :> PYSVPower[x,r],
-                  Pi -> PYSVPi, 
-                  E  -> PYSVE,  
+                  Pi -> PYSVPi,
+                  E  -> PYSVE,
                   Sqrt:>PYSVSqrt,
                   Log :> PYSVLog,
                   Sin :> PYSVSin,
@@ -102,7 +102,7 @@ PYSplitVertices[vertices_] := Block[{
        split1 = Join @@ WaitAll[split1];
       ];
 
-    lorentzstruc = Map[Take[#,{1,1}]&, split1, {2}];  
+    lorentzstruc = Map[Take[#,{1,1}]&, split1, {2}];
 
     If[Global`FR$Parallelize === False,
        split2 = FullSplitC[Map[Take[#,{2,2}]&, split1, {2}]],
@@ -116,9 +116,9 @@ PYSplitVertices[vertices_] := Block[{
        split2 = Join @@ WaitAll[split2];
       ];
 
-    colorstruc = Map[Take[#,{1,1}]&, split2, {2}];    
-    couplstruc = Map[Take[#,{2,2}]&, split2, {2}] //. reversenumberrpls; 
-   
+    colorstruc = Map[Take[#,{1,1}]&, split2, {2}];
+    couplstruc = Map[Take[#,{2,2}]&, split2, {2}] //. reversenumberrpls;
+
 
 (*    colorstruc = ColorList[verts];
     lorentzstruc = StructureList[verts];
@@ -138,7 +138,7 @@ PYSplitVertices[vertices_] := Block[{
    verts = StrictInner[Prepend, verts, particles, List];
 
    (* Set the progress bar *)
-   If[$VersionNumber >= 6, 
+   If[$VersionNumber >= 6,
       Print["    - Optimizing: ", Dynamic[PY$SplitVertexCounter], "/", Length[verts], " ."],
       (* else *)
       Print["    - Optimizing."]];
@@ -205,7 +205,7 @@ PYMergeIndices[yy_?(Head[#]=!=HC&), i1_,i2_] := If[MatchQ[yy, _[___]], Append[Ap
 
 
 PYTensDotOpen[xx__, yy_][Index[name_ ,s1__], Index[name_, s2__]] := Block[{newindex = Unique["int$$"]},
- 
+
       PYTensDotOpen[xx][Index[name, s1], Index[name, newindex]] * PYMergeIndices[yy, Index[name, newindex], Index[name, s2]]
 ];
 
@@ -221,7 +221,7 @@ PYTensDotOpen[xx_][s1_, s2_] := PYMergeIndices[xx, s1, s2];
 
 
 PYSPOpen[p1_, p2_] := Block[{ newindex = Unique["mu$$"] },
-   
+
        L$FV[p1, Index[Lorentz, newindex]] * L$FV[p2, Index[Lorentz, newindex]]
 
 ];
@@ -236,7 +236,7 @@ PYSPOpen[p1_, p2_] := Block[{ newindex = Unique["mu$$"] },
 
 
 PYffOpen[a1_, a2_, a3_, a4_] := Block[{ newindex = Unique["a$$"] },
-   
+
        C$f[a1, a2, Index[Gluon, newindex]] * C$f[Index[Gluon, newindex], a3, a4]
 
 ];
@@ -277,18 +277,18 @@ OptimizeIndexName[ expr_, OptionsPattern[] ] := Block[{workexpr = expr, internal
       If[FreeQ[workexpr, Index[_, Except[Ext[_]], ___]],
          Return[workexpr]
         ];
-  
+
       (* else, start *)
       workexpr = Expand[workexpr];
 
       (* if expr is a sum, then treat each term separately *)
-      If[Head[workexpr] === Plus, 
+      If[Head[workexpr] === Plus,
          Return[OptimizeIndexName /@ workexpr]
         ];
 
       (* otherwise, read out the internal indices *)
       workexpr /. {Index[name_, Except[Ext[__], val_], opt___] :> (AppendTo[internalindices, Index[name, val, opt]] ; Index[name, val, opt])};
- 
+
       (* Remove double entries *)
       internalindices = Union[internalindices];
 
@@ -305,17 +305,17 @@ OptimizeIndexName[ expr_, OptionsPattern[] ] := Block[{workexpr = expr, internal
 
       (* Finally apply the replacements *)
       workexpr = workexpr //. internalindices //. FR$OptInt -> Int;
- 
+
       (* Return and exit *)
       Return[workexpr];
 
 ];
 
-      
 
-      
 
-     
+
+
+
 
 
 (* ::Subsection:: *)
@@ -350,14 +350,14 @@ OptimizePYSplitVertices[splitvertex_, {counter_}] := Block[{svertex = Rest[split
     svertex = svertex /. {L$SP -> PYSPOpen , L$SlashedP -> PYSlashedPOpen, C$ff -> PYffOpen};
 
     (* last but not least, another renaming of internal indices *)
-    svertex = {OptimizeIndexName[#1], MapAt[OptimizeIndexName, #2, 2], Map[OptimizeIndexName, #3]}& @@@ svertex;  
+    svertex = {OptimizeIndexName[#1], MapAt[OptimizeIndexName, #2, 2], Map[OptimizeIndexName, #3]}& @@@ svertex;
 
     (* Return and exit *)
     Return[Prepend[svertex ,parts]];
 
-];  
+];
 
-    
+
 
 
 (* ::Subsection:: *)
@@ -374,8 +374,8 @@ OptimizeInteractionOrders[particles_, structures__] := Block[{
     struclist = {structures}
 
    },
-  
-   
+
+
     (* Proceed term by term via helperfunction *)
     struclist = OptimizeInteractionOrdersInStructure @@@ struclist;
 
@@ -386,8 +386,8 @@ OptimizeInteractionOrders[particles_, structures__] := Block[{
     Return[struclist];
 
 ];
-    
-   
+
+
 
 
 OptimizeInteractionOrdersInStructure[color_, lorentz_, coupling_] := Block[{
@@ -402,8 +402,8 @@ OptimizeInteractionOrdersInStructure[color_, lorentz_, coupling_] := Block[{
       ];
 
     (* Get the interaction order for each term in the sum, and collect accordingly *)
-    coupl = GatherByFirstElement[{GetIntOrder[#], #}& /@ (List @@ coupl)]; 
-    
+    coupl = GatherByFirstElement[{GetIntOrder[#], #}& /@ (List @@ coupl)];
+
     (* Recombine *)
     coupl = CouplingObject /@ (Plus @@@ (Map[Last, #]& /@ coupl));
 
@@ -412,7 +412,7 @@ OptimizeInteractionOrdersInStructure[color_, lorentz_, coupling_] := Block[{
 
 ];
 
-    
+
 
 
 
@@ -470,7 +470,7 @@ PYReorderParticles[particles_] := Block[{parts = particles},
 
       (* Construct the flows *)
       fermions = Join @@ Table[CanonicalOrder[fermions[[i+1]], fermions[[i]]], {i, 1, Length[fermions]-1, 2}];
-  
+
       (* recombine *)
       parts = Join[fermions, nonfermions];
 
@@ -500,7 +500,7 @@ PYOrderFermions[particles_,vertex_] := Block[{parts = particles, fermions, nonfe
       structures = chainorder;
 
       If[Length[chainorder] > 1,
-         Print[Style["Warning: Multi-Fermion operators are not yet fully supported!", Red]]; 
+         Print[Style["Warning: Multi-Fermion operators are not yet fully supported!", Red]];
         ];
 
       chainorder = List @@ (chainorder /. _[___,Index[Spin, i_], Index[Spin,j_]] :> hold[i,j] //. hold[i_,j_]hold[j_,k_]:>hold[i,k]);
@@ -524,9 +524,9 @@ PYOrderFermions[particles_,vertex_] := Block[{parts = particles, fermions, nonfe
 TurnFermionicIndexDeltas[_[psi1_,psi2_],struc_]:= Block[{},
 
     (* We check if psi1 is an antifield, and if struc is a delta function. If so, reverse the fermions. This does not change anything for the fermion flow*)
-    If[Not[MatchQ[struc, IndexDelta[_,_]]], 
+    If[Not[MatchQ[struc, IndexDelta[_,_]]],
        Return[{psi1,psi2}]];
-  
+
     If[AntiFieldQ[psi1[[1]]],
        Return[{psi2,psi1}],
        Return[{psi1,psi2}]
@@ -535,23 +535,23 @@ TurnFermionicIndexDeltas[_[psi1_,psi2_],struc_]:= Block[{},
 
 CheckFermionicIndexDeltas[_[psi1_,psi2_], struc_] := Block[{newindexdelta,rule},
 
-    (* We check if the order of the indices of the IndexDelta is the same as for the order of the fermions. 
-       This is pure cosmetics, as the index delta does not feel the flow 
+    (* We check if the order of the indices of the IndexDelta is the same as for the order of the fermions.
+       This is pure cosmetics, as the index delta does not feel the flow
        The output is a replacement rule list that contains the reversal, if any *)
 
-        If[Not[MatchQ[struc, IndexDelta[_,_]]], 
+        If[Not[MatchQ[struc, IndexDelta[_,_]]],
            Return[{}]];
-    
+
         newindexdelta = IndexDelta[Index[Spin, Ext[psi2[[2]]]], Index[Spin, Ext[psi1[[2]]]]];
-        rule = If[newindexdelta =!= struc, 
+        rule = If[newindexdelta =!= struc,
                   {struc -> newindexdelta},
                   {}
                   ];
 
         Return[rule];
 ];
-        
-        
+
+
 
 
 
@@ -590,8 +590,8 @@ CreateVertexObjectEntry[list_, {counter_Integer}] := Block[{
      pyvertex
     },
 
-   (* Remove the CC statements, and the bar for Majoranas, 
-      then introduce the particle names, and finally 
+   (* Remove the CC statements, and the bar for Majoranas,
+      then introduce the particle names, and finally
       check if we need new Particle object names.
     *)
 
@@ -602,7 +602,7 @@ CreateVertexObjectEntry[list_, {counter_Integer}] := Block[{
     (* Now, create the color structure strings *)
     coupl = {PythonForm[#1], #2, #3}& @@@ coupl;
     colors = Union[First /@ coupl];
-    
+
     (* We now build replacement rules to identify back the Lorentz and color structures,
        and how they are convolved.
      *)
@@ -612,8 +612,8 @@ CreateVertexObjectEntry[list_, {counter_Integer}] := Block[{
     (* And we then apply these reverse replacements to coupl *)
     coupl = coupl /. colorreverse /. lorentzreverse;
 
-    (* Finally, since a list in Python starts with 0, and not one, we 
-       have to rescale everything by one unit 
+    (* Finally, since a list in Python starts with 0, and not one, we
+       have to rescale everything by one unit
      *)
      coupl = {#1-1, #2-1, #3}& @@@ coupl;
 
@@ -632,10 +632,10 @@ CreateVertexObjectEntry[list_, {counter_Integer}] := Block[{
 
      (* Return and exit *)
      Return[pyvertex];
-                 
+
 ];
 
-    
+
 
 
 (* ::Section::Closed:: *)
@@ -655,7 +655,7 @@ WriteVertexObject[file_, vertex_List] := Block[{
      WriteString[file, "\n"];
 
 ];
-   
+
 
 
 (* ::Section:: *)
@@ -679,10 +679,11 @@ WritePYVertices[vertexlist_] := Block[{outfile, vertlist=vertexlist, PullOutSing
    outfile = OpenWrite["vertices.py"];
 
    WritePYFRHeader[outfile];
-   WriteString[outfile, "from object_library import all_vertices, Vertex\n"];
-   WriteString[outfile, "import particles as P\n"];
-   WriteString[outfile, "import couplings as C\n"];
-   WriteString[outfile, "import lorentz as L\n"];
+   WriteString[outfile, "from __future__ import absolute_import\n"];
+   WriteString[outfile, "from .object_library import all_vertices, Vertex\n"];
+   WriteString[outfile, "from . import particles as P\n"];
+   WriteString[outfile, "from . import couplings as C\n"];
+   WriteString[outfile, "from . import lorentz as L\n"];
    WriteString[outfile, "\n\n"];
 
    (* CD, 31.03.2015: With SH and MG5 we decided to go back to one coupling per vertex, not list thereof if they have different InteractionOrders *)
@@ -694,7 +695,7 @@ WritePYVertices[vertexlist_] := Block[{outfile, vertlist=vertexlist, PullOutSing
 
       maxiter=Max[Length/@vertsparts];
       If[maxiter<2,Return[vo]];
-  
+
       vertsparts=Table[If[Length[#]<i,{},#[[i]]]&/@vertsparts,{i,maxiter}];
       vertsparts=DeleteCases[#,{}]&/@vertsparts;
       vertsparts=vertsparts//.VertTermObj->List;
@@ -707,16 +708,16 @@ WritePYVertices[vertexlist_] := Block[{outfile, vertlist=vertexlist, PullOutSing
    (* CD End*)
 
    WriteVertexObject[outfile, #1]& /@ MapIndexed[CreateVertexObjectEntry, vertlist];
-   
+
    Close[outfile];
-  
+
    AppendTo[GenInt$LogFile, "   * " <> If[Length[vertlist] == 1, "1 vertex", ToString[Length[vertlist]] <> " vertices"] <> " written."];
    TestQ[FileExistsQ, "vertices.py", "   * vertices.py written.", "   * vertices.py not written"];
 
    (* Write the log file *)
    WriteToLogFile[GenInt$LogFileName];
 
-]; 
+];
 
 
 (* ::Section:: *)
@@ -772,7 +773,7 @@ GetIntOrder[expr_Plus] := Block[{
      Return[ios[[1]]];
 
 ];
-    
+
 
 
 (* ::Text:: *)
@@ -857,7 +858,7 @@ CheckForNegativeInteractionOrders[vector_?VectorQ, coupling_] := Block[{name, or
 
 ];
 
-       
+
 
 
 
@@ -905,7 +906,7 @@ CreateLorentzObjectName[list_List] := Block[{counter, name},
 
 ];
 
-    
+
 
 
 (* ::Subsection:: *)
@@ -916,7 +917,7 @@ CreateLorentzObjectName[list_List] := Block[{counter, name},
 (*CreateLorentzObjectEntry[ LorentzObject] takes a definition for a single Lorentz object and transforms into the format required by for the Python vertex objects.*)
 
 
-CreateLorentzObjectEntry[LorentzObject[name_, spins_, expr_, formfs_]] := Block[{outlist, 
+CreateLorentzObjectEntry[LorentzObject[name_, spins_, expr_, formfs_]] := Block[{outlist,
    exp = expr},
 
    (* We have to open the tensor products *)
@@ -946,7 +947,7 @@ WriteLorentzObject[file_, LorentzObject[name_String, entries_List]] := Block[{},
      WriteString[file, "\n"];
 
 ];
-   
+
 
 
 (* ::Section::Closed:: *)
@@ -970,25 +971,26 @@ WritePYLorentz[list_] := Block[{outfile},
    outfile = OpenWrite["lorentz.py"];
 
    WritePYFRHeader[outfile];
-   WriteString[outfile, "from object_library import all_lorentz, Lorentz\n"];
-   WriteString[outfile, "\nfrom function_library import ", Sequence @@ Riffle[PY$NewCMathFunctions, ", "], "\n"];
+   WriteString[outfile, "from __future__ import absolute_import\n"];
+   WriteString[outfile, "from .object_library import all_lorentz, Lorentz\n"];
+   WriteString[outfile, "\nfrom .function_library import ", Sequence @@ Riffle[PY$NewCMathFunctions, ", "], "\n"];
    WriteString[outfile, "try:\n"];
-   WriteString[outfile, "   import form_factors as ForFac \n"];
+   WriteString[outfile, "   from . import form_factors as ForFac \n"];
    WriteString[outfile, "except ImportError:\n"];
    WriteString[outfile, "   pass\n"];
    WriteString[outfile, "\n\n"];
 
    WriteLorentzObject[outfile, #]& /@ (CreateLorentzObjectEntry /@ list);
-   
+
    Close[outfile];
-  
+
    AppendTo[GenInt$LogFile, "   * " <> If[Length[list] == 1, "1 lorentz structure", ToString[Length[list]] <> " lorentz structures"] <> " written."];
    TestQ[FileExistsQ, "lorentz.py", "   * lorentz.py written.", "   * lorentz.py not written"];
 
    (* Write the log file *)
    WriteToLogFile[GenInt$LogFileName];
 
-]; 
+];
 
 
 (* ::Section:: *)
@@ -1006,8 +1008,8 @@ CreateCouplingObjectEntry[object_UVCouplingObject] := CreateCouplingObjectEntry[
 
 
 CreateCouplingObjectEntry[CouplingObject[name_, expr_], laurentseries_:False] := Block[{
-    outlist, 
-    order, 
+    outlist,
+    order,
     exp = expr //. ParamRules
     },
 
@@ -1039,8 +1041,8 @@ CreateCouplingObjectEntry[CouplingObject[name_, expr_], laurentseries_:False] :=
             CreatePYLaurentSeriesDic[exp],
             PYString[PythonForm[exp]]
            ];
-      
-   
+
+
 
    (* and finally we introduce the Python notation *)
    order = {PYString[ToString[#1]], ToString[#2]}& @@@ order;
@@ -1068,9 +1070,9 @@ CombineLaurentSeriesCoefficients[list_List] := Block[{
     lisi = list,
     eppower = list[[1,1]]
     },
-    
+
     (* Pull out the exponent of epsilon *)
-    eppower = Which[eppower === 1, 0, 
+    eppower = Which[eppower === 1, 0,
                     eppower === FR$Eps, 1,
                     MatchQ[eppower, Power[FR$Eps, _]], eppower[[2]],
                     True, Message[NLO::Failed]
@@ -1111,7 +1113,7 @@ CreatePYLaurentSeriesDic[laurentseries_] := Block[{
    laurser = laurser /.RenormLog[1]->0 //. RenormLog[x_] :> Log[x(*/FR$MU*)];
    laurser[[All,2]]=GatherIf/@laurser[[All,2]]/.If[a_==0,b_,c_]->If[a,c,b]; (*Special Madgraph case*)
    laurser=laurser/.Log->RenormLog;
-   
+
    (* Convert everything to strong *)
    laurser = {ToString[#1], PYString[PythonForm[#2]]}& @@@ laurser;
    (* Create the dictionary *)
@@ -1119,9 +1121,9 @@ CreatePYLaurentSeriesDic[laurentseries_] := Block[{
 
    Return[laurser];
 ];
-   
 
-   
+
+
 
 
 (* ::Section:: *)
@@ -1140,7 +1142,7 @@ WriteCouplingObject[file_, CouplingObject[name_String, entries_List]] := Block[{
      WriteString[file, "\n"];
 
 ];
-   
+
 
 
 (* ::Section:: *)
@@ -1164,21 +1166,22 @@ WritePYCouplings[list_] := Block[{outfile},
    outfile = OpenWrite["couplings.py"];
 
    WritePYFRHeader[outfile];
-   WriteString[outfile, "from object_library import all_couplings, Coupling\n"];
-   WriteString[outfile, "\nfrom function_library import ", Sequence @@ Riffle[PY$NewCMathFunctions, ", "], "\n\n"];
+   WriteString[outfile, "from __future__ import absolute_import\n"];
+   WriteString[outfile, "from .object_library import all_couplings, Coupling\n"];
+   WriteString[outfile, "\nfrom .function_library import ", Sequence @@ Riffle[PY$NewCMathFunctions, ", "], "\n\n"];
    WriteString[outfile, "\n\n"];
 
    WriteCouplingObject[outfile, #]& /@ (CreateCouplingObjectEntry /@ list);
-   
+
    Close[outfile];
-  
+
    AppendTo[GenInt$LogFile, "   * " <> If[Length[list] == 1, "1 coupling", ToString[Length[list]] <> " couplings"] <> " written."];
    TestQ[FileExistsQ, "couplings.py", "   * couplings.py written.", "   * couplings.py not written"];
 
    (* Write the log file *)
    WriteToLogFile[GenInt$LogFileName];
 
-]; 
+];
 
 
 (* ::Section:: *)
@@ -1228,11 +1231,11 @@ OptimizeColors[particles_, vertex___] := Block[{
     },
 
     verts = VertObjPart @@@ verts;
- 
+
     verts = verts //. {vv1___, VertObjPart[col1_, lor1_, coup1_], vv2___, VertObjPart[col2_, lor1_, coup1_], vv3___} :> {vv1, VertObjPart[col1+col2, lor1, coup1], vv2, vv3};
 
     verts = List @@@ verts;
-    
+
     Return[Prepend[verts, particles]];
 
 ];
@@ -1285,13 +1288,13 @@ OptimizeUFOVertices[vertices_List, couplings_List, lorentz_List] := Block[{
     Return[newvertices];
 
 ];
-    
-    
 
-    
-   
 
-    
+
+
+
+
+
 
 
 
@@ -1349,13 +1352,13 @@ RenameAntiColourStructures[particles_, vertex__] := Block[{
 RenameAntiColour[colorstruc_, particles_List] := Block[{
     colstruc = Expand[colorstruc]},
 
-   (* If no Eps, and no K6, nothing to be done *) 
-   If[FreeQ[colstruc, C$Eps|C$K6], 
+   (* If no Eps, and no K6, nothing to be done *)
+   If[FreeQ[colstruc, C$Eps|C$K6],
       Return[colstruc];
      ];
 
    (* If sum, start over *)
-   If[Head[colstruc] === Plus, 
+   If[Head[colstruc] === Plus,
       Return[RenameAntiColour[#, particles]& /@ colstruc];
      ];
 

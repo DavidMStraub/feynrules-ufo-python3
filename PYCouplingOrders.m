@@ -107,17 +107,17 @@ WritePYCouplingOrders[] := Block[{outfile},
    outfile = OpenWrite["coupling_orders.py"];
 
    WritePYFRHeader[outfile];
-   WriteString[outfile, "from object_library import all_orders, CouplingOrder\n"];
+   WriteString[outfile, "from .object_library import all_orders, CouplingOrder\n"];
    WriteString[outfile, "\n\n"];
 
    WriteCouplingOrderObject[outfile, #]& /@ (CreateCouplingObjectEntry /@ PYConvolveCouplingOrdersLists[FR$InteractionOrderHierarchy,FR$InteractionOrderLimit,FR$InteractionOrderPerturbativeExpansion]);
-   
+
    Close[outfile];
-  
+
    AppendTo[GenInt$LogFile, "   * " <> If[Length[list] == 1, "1 coupling order", ToString[Length[list]] <> " couplings orders"] <> " written."];
    TestQ[FileExistsQ, "coupling_orders.py", "   * coupling_orders.py written.", "   * coupling_orders.py not written"];
 
    (* Write the log file *)
    WriteToLogFile[GenInt$LogFileName];
 
-]; 
+];

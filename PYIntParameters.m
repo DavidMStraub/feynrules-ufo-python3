@@ -37,7 +37,7 @@ ReorderEParamEntry[{lhablock_, lhanumber_, name_, value_, type_, descrip_}] := {
 (* For no InteractionOrder *)
 
 MakeInteractionOrderMatrix[ios__]:= Table[{{ios}[[2k-1]],{ios}[[2k]]},{k,Length[{ios}]/2}];
-    
+
 
 ReorderEParamEntry[{lhablock_, lhanumber_, name_, ios__,  value_, type_, descrip_}] := {name, name /. ParamRules, type, value, descrip, ToString[name, TeXForm], lhablock, lhanumber, MakeInteractionOrderMatrix[ios]};
 
@@ -104,11 +104,11 @@ ReorderIParamEntry[{name_, value_, ios__, type_, descrip_}] := {name, name /. Pa
 ChangeEParameterConventions[eparamlist_, masslist_, widthlist_] := Block[{newlist = eparamlist, neparams = Length[eparamlist],
     newmasslist = masslist[[2]], newwidthlist = widthlist[[2]],
     goldsnghosts = List[#]& /@ Join[Select[Join @@ PartList[[All,2]], #[[3]] === U &][[All,9]],Select[Join @@ PartList[[All,2]], Last[#] =!= NoGS &][[All,9]]]},
-  
-   (* We bring newlist to the matrix form 
+
+   (* We bring newlist to the matrix form
       {LHABlock, {LHANumber}, Name, Value, Type, Description}
       or for parameters with interaction order defined,
-      {LHABlock, {LHANumber}, Name, InteractionOrder, InteractionOrderValue, Value, Type, Description} 
+      {LHABlock, {LHANumber}, Name, InteractionOrder, InteractionOrderValue, Value, Type, Description}
     *)
 
     newlist = MapAt[Sequence @@ # &, #, 3]& /@ (Join @@ Table[Prepend[#, newlist[[kk, 1]]]& /@ newlist[[kk,2]], {kk, neparams}]);
@@ -120,7 +120,7 @@ ChangeEParameterConventions[eparamlist_, masslist_, widthlist_] := Block[{newlis
 
     (* We now add the masses *)
     (* We start by removing the mass entries for goldstones and ghosts *)
-    newmasslist = Select[newmasslist,Not[MemberQ[goldsnghosts, #[[1]]]]&]; 
+    newmasslist = Select[newmasslist,Not[MemberQ[goldsnghosts, #[[1]]]]&];
     (** ADDED BY BENJ: removing extra mass parameters when several particles have the same masses **)
     newmasslist = Delete[newmasslist,List/@Flatten[Drop[Position[newmasslist[[All,2]],#],-1]&/@ DeleteCases[Tally[newmasslist[[All,2]]],{_,1}][[All,1]]]];
     (** END BENJ **)
@@ -137,7 +137,7 @@ Print[newmasslist];*)
     newmasslist = newmasslist /. NoPDG -> Identity;
 
     (* We now do the same for the width *)
-    newwidthlist = Select[newwidthlist,Not[MemberQ[goldsnghosts, #[[1]]]]&]; 
+    newwidthlist = Select[newwidthlist,Not[MemberQ[goldsnghosts, #[[1]]]]&];
 (*    newwidthlist = RemoveDuplicateMassesOrWidthsForUFO[newwidthlist]*)
     newwidthlist = DeleteCases[Prepend[#, DECAY]& /@ newwidthlist, {__, Internal}];
     (* Then we reorder it into the required form *)
@@ -150,7 +150,7 @@ Print[newmasslist];*)
 
     (* Prepend External *)
     newlist = Prepend[#, External]& /@ newlist;
-   
+
 
     (* Return and exit *)
     FRDebug["ChangeEParameterConventions", newlist];
@@ -170,7 +170,7 @@ Print[newmasslist];*)
 
 
 ChangeIParameterConventions[iparamlist_] := Block[{newlist = iparamlist, neparams = Length[iparamlist]},
-  
+
     (* We now reorder this matrix according to the new convention *)
     (* We start with the parameters without interaction order *)
 
@@ -198,24 +198,24 @@ ChangeIParameterConventions[iparamlist_] := Block[{newlist = iparamlist, neparam
 
 
 PYCheckParameters[params_] := Block[{numbers, isnumber, makedialog = False, iscomplex, newparams = params, blocks, eparams},
-  
+
     (* Check if everything has a value *)
      numbers = {#, NumericalValue[#]}& /@ newparams[[All, 3]];
      isnumber =  {#1, NumericQ[#2]}& @@@ numbers;
      If[Not[#[[2]]], makedialog = True; AppendTo[GenInt$LogFile, "   * Parameter " <> ToString[#[[1]]] <> " has no value. Default value 1 assigned."]]& /@ isnumber;
-     If[makedialog, 
+     If[makedialog,
         AppendTo[GenInt$Dialog, "- Some parameters do not have assigned a value. Assigning default value 1.\n"]
         ];
      makedialog = False;
- 
+
     (* Check if every eparam has an LHA block assigned *)
     eparams = Cases[params, {External, __}];
     blocks = Transpose[List[eparams[[All, 3]], eparams[[All, 7]]]];
     If[MatchQ[#, {_, NoBlockName[_]}], makedialog = True; AppendTo[GenInt$LogFile, "   * External parameter " <> ToString[#[[1]]] <> " has no BlockName assigned. Default block FRBlock assigned."]]& /@ blocks;
-    If[makedialog, 
+    If[makedialog,
         AppendTo[GenInt$Dialog, "- Some external parameters do not have assigned a BlockName. Assigning default block FRBlock.\n"]
         ];
-     
+
     (* Check if complex numbers are defined as complex *)
      iscomplex = {#1, MatchQ[#2, _Complex]}& @@@ numbers;
      Do[If[iscomplex[[kk, 2]],
@@ -234,7 +234,7 @@ PYCheckParameters[params_] := Block[{numbers, isnumber, makedialog = False, isco
      FRDebug["CheckParameters", newparams];
      Return[newparams]
 
-];  
+];
 
 
 (* ::Subsection:: *)
@@ -247,7 +247,7 @@ RemoveDuplicateMassesOrWidthsForUFO[masslist_List] := Block[{mlist = masslist},
     Return[mlist];
 ];
 
-    
+
 
 
 (* ::Section:: *)
@@ -285,7 +285,7 @@ CheckPythonParameters[eparams_, iparams_, masslist_, widthlist_] := Block[{
 
 
    (* Write results to the LogFile *)
-   If[Length[GenInt$LogFile] == 0, 
+   If[Length[GenInt$LogFile] == 0,
       AppendTo[GenInt$LogFile, "   * All parameters are ok."]
       ];
    AppendTo[GenInt$LogFile, ""];
@@ -348,7 +348,7 @@ ParameterWaterfall[iparams_] := Block[{testfunc,
 
 
 ParamToPYForm[params_] := Block[{eparams, iparams, newparams},
-   
+
    eparams = Cases[params, {External, __}];
    iparams = Cases[params, {Internal, __}];
 
@@ -362,7 +362,7 @@ ParamToPYForm[params_] := Block[{eparams, iparams, newparams},
    Return[newparams]
 
 ];
-   
+
 
 
 (* ::Subsection:: *)
@@ -375,7 +375,7 @@ ParamToPYForm[params_] := Block[{eparams, iparams, newparams},
 
 
 CreateParameterObjectEntry[paramdef_] := Block[{dicout},
-   
+
    dicout = {{"name",         PYString[MakeString[paramdef[[3]]]]},
              {"nature",       paramdef[[1]]} /. {External -> "'external'", Internal -> "'internal'"},
              {"type",         If[paramdef[[4]], "'complex'", "'real'"]},
@@ -392,7 +392,7 @@ CreateParameterObjectEntry[paramdef_] := Block[{dicout},
     Return[dicout]
 
 ];
-             
+
 
 
 (* ::Subsection:: *)
@@ -405,7 +405,7 @@ CreateParameterObjectEntry[paramdef_] := Block[{dicout},
 
 
 CreateCTParameterObjectEntry[paramdef_] := Block[{dicout},
-   
+
    dicout = {{"name",         PYString[MakeString[paramdef[[1]]]]},
              {"type",         "'complex'"},
              {"value",        paramdef[[2]]},
@@ -416,7 +416,7 @@ CreateCTParameterObjectEntry[paramdef_] := Block[{dicout},
     Return[dicout]
 
 ];
-             
+
 
 
 (* ::Subsection:: *)
@@ -445,7 +445,7 @@ WriteParameterObject[file_, list_List] := Block[{
      WriteString[file, "\n"];
 ];
 
-      
+
 
 
 (* ::Section:: *)
@@ -471,7 +471,7 @@ WritePYParameters[pars_, isNLO_:False] := Block[{paramfile, plist = pars, outfil
                  {"lhacode",  "[1]"}}
    },
 
-   
+
    (* Create parameter python dictionary *)
    plist = ParamToPYForm[plist];
    plist = CreateParameterObjectEntry /@ plist;
@@ -480,8 +480,9 @@ WritePYParameters[pars_, isNLO_:False] := Block[{paramfile, plist = pars, outfil
    DeleteFileIfExists["parameters.py"];
    outfile = OpenWrite["parameters.py"];
    WritePYFRHeader[outfile];
-   WriteString[outfile, "\nfrom object_library import all_parameters, Parameter\n\n"];
-   WriteString[outfile, "\nfrom function_library import ", Sequence @@ Riffle[PY$NewCMathFunctions, ", "], "\n\n"];
+   WriteString[outfile, "from __future__ import absolute_import\n"];
+   WriteString[outfile, "\nfrom .object_library import all_parameters, Parameter\n\n"];
+   WriteString[outfile, "\nfrom .function_library import ", Sequence @@ Riffle[PY$NewCMathFunctions, ", "], "\n\n"];
 
    WritePYCommentLine[outfile, "This is a default parameter object representing 0."];
    WritePYObject[outfile, "ZERO", "Parameter", zeroobject];
@@ -497,12 +498,8 @@ WritePYParameters[pars_, isNLO_:False] := Block[{paramfile, plist = pars, outfil
    WriteParameterObject[outfile, #]& /@ plist;
    Close[outfile];
    TestQ[FileExistsQ, "parameters.py", "   * parameters.py written.", "   * parameters.py not written"];
-   
+
    (* Write the Log file *)
    WriteToLogFile[GenInt$LogFileName];
 
 ];
-
-   
-
-   

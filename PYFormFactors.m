@@ -16,7 +16,7 @@ CountFormFactors[expi_, fff_] := If[expi === fff, Return[1], Return[Count[expi, 
 
 
 AddFormFactorsToLorentzObject[LorentzObject[name_, spins_, exp_]] := Block[{ffs},
-   
+
     (* Make a list which counts how many times a given form factor appear inside the expression,
        then delete those that appear 0 times *)
     ffs = {#, CountFormFactors[exp, #]}& /@ FR$FormFactors;
@@ -45,16 +45,16 @@ CreatePYFormFactorEntry[{nameff_, expff_}] := Block[{
 
    (* Pass to Python form *)
     expf = PythonForm[expf];
-  
+
     Return[FormFactorObject[ToString[name], {{"name",  PYString[ToString[name]]},
                                    {"type",  PYString[If[compl, "complex", "real"]]},
                                    {"value", PYString[expf]}}]];
 ];
-    
 
-   
 
-   
+
+
+
 
 
 (* ::Section:: *)
@@ -67,7 +67,7 @@ WriteFormFactorObject[file_, FormFactorObject[name_String, entries_List]] := Blo
      WriteString[file, "\n"];
 
 ];
-   
+
 
 
 (* ::Section:: *)
@@ -87,19 +87,20 @@ WritePYFormFactors[list_] := Block[{outfile},
    outfile = OpenWrite["form_factors.py"];
 
    WritePYFRHeader[outfile];
-   WriteString[outfile, "from object_library import all_form_factors, FormFactor\n"];
-   WriteString[outfile, "\nfrom function_library import ", Sequence @@ Riffle[PY$NewCMathFunctions, ", "], "\n\n"];
+   WriteString[outfile, "from __future__ import absolute_import\n"];
+   WriteString[outfile, "from .object_library import all_form_factors, FormFactor\n"];
+   WriteString[outfile, "\nfrom .function_library import ", Sequence @@ Riffle[PY$NewCMathFunctions, ", "], "\n\n"];
    WriteString[outfile, "\n\n"];
 
    WriteFormFactorObject[outfile, #]& /@ (CreatePYFormFactorEntry /@ list);
 
-   
+
    Close[outfile];
-  
+
    AppendTo[GenInt$LogFile, "   * " <> If[Length[list] == 1, "1 form factor", ToString[Length[list]] <> " form factors"] <> " written."];
    TestQ[FileExistsQ, "form_factors.py", "   * form_factors.py written.", "   * form_factors.py not written"];
 
    (* Write the log file *)
    WriteToLogFile[GenInt$LogFileName];
 
-]; 
+];
