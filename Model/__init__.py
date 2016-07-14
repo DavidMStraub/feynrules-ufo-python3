@@ -1,12 +1,13 @@
 
+from __future__ import absolute_import
 import particles
 import couplings
 import lorentz
 import parameters
 import vertices
 import coupling_orders
-import write_param_card
-import propagators
+from . import write_param_card
+from . import propagators
 
 
 all_particles = particles.all_particles

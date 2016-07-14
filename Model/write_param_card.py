@@ -1,8 +1,11 @@
 
+from __future__ import absolute_import
+from __future__ import print_function
+from six.moves import range
 __date__ = "02 Aug 2012"
 __author__ = 'olivier.mattelaer@uclouvain.be'
 
-from function_library import *
+from .function_library import *
 
 class ParamCardWriter(object):
     
@@ -178,7 +181,7 @@ class ParamCardWriter(object):
         """ write qnumber """
         from particles import all_particles
         import particles
-        print particles.__file__
+        print(particles.__file__)
         text="""#===========================================================\n"""
         text += """# QUANTUM NUMBERS OF NEW STATE(S) (NON SM PDG CODE)\n"""
         text += """#===========================================================\n\n"""
@@ -203,5 +206,5 @@ class ParamCardWriter(object):
             
 if '__main__' == __name__:
     ParamCardWriter('./param_card.dat', generic=True)
-    print 'write ./param_card.dat'
+    print('write ./param_card.dat')
     
